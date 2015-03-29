@@ -193,7 +193,7 @@ function listenerCallback(details) {
 		urlLink.href = details.url;
 
 		if (isInBlacklist(urlLink.hostname)) {
-			var block = shouldBlock();
+			var block = shouldBlockNow();
 			console.log("blocked: " + details.url);
 			return { redirectUrl: chrome.extension.getURL("blocked.html") };
 		}
