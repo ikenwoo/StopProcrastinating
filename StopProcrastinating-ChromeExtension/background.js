@@ -39,7 +39,7 @@ function updateApp() {
 	// console.log(appState);
 
 	// Perform updates using app state
-	if (appState.manualSwitchOn || appState.manualSwitchOn || appState.timerOn) {
+	if (appState.manualSwitchOn || appState.scheduleOn || appState.timerOn) {
 		// add listener if it doesn't exist
 		if (!chrome.webRequest.onBeforeRequest.hasListener(listenerCallback)) {
 			chrome.webRequest.onBeforeRequest.addListener(
@@ -140,16 +140,26 @@ function createSchedule() {
 
 function isCurrentTimeBlockedInSchedule() {
 	var currentDate = new Date();
-	var dayOfWeek = currentDate.getDay();
-	var currentHour = currentDate.getHours();
-	var currentMinute = currentDate.getMinutes();
-	var currentSlot = 0;
-	if (currentMinute >= 30) {
-		currentSlot = 1;
+	var dayOfWeek = getDayOfWeekForTime(currentDate);
+	var currentSlot = getSlotInDayForTime(currentDate);
+
+	var isOn = getSlotInSchedule(dayOfWeek, currentSlot);
+	return isOn;
+}
+
+function getDayOfWeekForTime(time) {
+	return time.getDay();
+}
+
+function getSlotInDayForTime(time) {
+	var hourForTime = time.getHours();
+	var minuteForTime = time.getMinutes();
+	var slotInDay = hourForTime * 2;
+	if (minuteForTime >= 30) {
+		slotInDay += 1;
 	}
 
-	var isOn = getSlotInSchedule(dayOfWeek, (currentHour * 2) + currentSlot);
-	return isOn;
+	return slotInDay;
 }
 
 function getSlotInSchedule(dayOfWeek, slotInDay) {
@@ -194,8 +204,11 @@ function listenerCallback(details) {
 
 		if (isInBlacklist(urlLink.hostname)) {
 			var block = shouldBlockNow();
-			console.log("blocked: " + details.url);
-			return { redirectUrl: chrome.extension.getURL("blocked.html") };
+
+			if (block) {
+				console.log("blocked: " + details.url);
+				return { redirectUrl: chrome.extension.getURL("blocked.html") };
+			}
 		}
 	}
 }

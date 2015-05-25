@@ -20,5 +20,9 @@
     "default_popup": "popup.html",
     "default_title": "Stop procrastinating!"
   },
-  "web_accessible_resources": ["blocked.html"]
+  "web_accessible_resources": ["blocked.html"],
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  }
 }
